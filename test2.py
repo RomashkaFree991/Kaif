@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher, Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.filters import CommandStart
-from aportalsmp.gifts import collections
+from aportalsmp.gifts import collections, giftsFloors
 from aportalsmp.auth import update_auth
 
 BOT_TOKEN = "8791052397:AAFYHdOk3VVuz2v_gaeAUS1up9gn6yNoUso"
@@ -27,10 +27,20 @@ async def init_auth():
 async def get_random_gift():
     auth = await init_auth()
     all_cols = await collections(authData=auth, limit=100)
-    data = all_cols.toDict()
-    names = list(data.keys())
-    name = random.choice(names)
-    gift = all_cols.gift(name)
+    floors = await giftsFloors(authData=auth)
+    floors_dict = floors.toDict()
+    short_names = list(floors_dict.keys())
+    random_short = random.choice(short_names)
+    try:
+        gift = all_cols.gift(random_short)
+    except Exception:
+        from aportalsmp.utils.functions import toShortName
+        for name in short_names:
+            try:
+                gift = all_cols.gift(name)
+                break
+            except Exception:
+                continue
     return gift
 
 
